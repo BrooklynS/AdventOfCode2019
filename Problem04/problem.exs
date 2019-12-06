@@ -12,16 +12,18 @@ defmodule Problem do
     
     defp hasTwoAdjacentDigits(x) do
         digits = getDigitList(x, [])
-        Enum.map(0..length(digits) - 2, fn x -> [first: x, second: x + 1] end) |>
-            Enum.filter(fn pair -> Enum.fetch(digits, pair[:first]) == Enum.fetch(digits, pair[:second]) end) |>
+        Stream.map(0..length(digits) - 2, &([first: &1, second: &1 + 1])) |>
+            Stream.filter(fn pair -> Enum.at(digits, pair[:first]) == Enum.at(digits, pair[:second]) end) |>
+            Enum.to_list() |>
             length() > 0
     end
 
     # Since digits never can decrease, hasTwoOfSame will detect if exactly two digits are adjacent.
     defp hasTwoOfSame(number) do
         digits = getDigitList(number, [])
-        Enum.map(0..9, fn x -> getDigitCount(x, digits, 0, 0) end) |>
-            Enum.filter(fn x -> x == 2 end) |>
+        Stream.map(0..9, &getDigitCount(&1, digits, 0, 0)) |>
+            Stream.filter(&(&1 == 2)) |>
+            Enum.to_list() |>
             length() > 0
     end
 
@@ -29,7 +31,7 @@ defmodule Problem do
         cond do
             currIndex < length(digits) ->
                 cond do
-                    Enum.fetch!(digits, currIndex) == targetValue ->
+                    Enum.at(digits, currIndex) == targetValue ->
                         getDigitCount(targetValue, digits, currentCount + 1, currIndex + 1)
                     true ->
                         getDigitCount(targetValue, digits, currentCount, currIndex + 1)
@@ -41,22 +43,25 @@ defmodule Problem do
 
     defp digitsNeverDecrease(x) do
         digits = getDigitList(x, [])
-        Enum.map(0..length(digits) - 2, fn x -> [first: x, second: x + 1] end) |>
-            Enum.filter(fn pair -> Enum.fetch(digits, pair[:first]) > Enum.fetch(digits, pair[:second]) end) |>
+        Stream.map(0..length(digits) - 2, &([first: &1, second: &1 + 1])) |>
+            Stream.filter(&(Enum.at(digits, &1[:first]) > Enum.at(digits, &1[:second]))) |>
+            Enum.to_list() |>
             length() == 0
     end
 
     def part1 do
-        Enum.map(265275..781584, fn x -> x end) |>
-            Enum.filter(&hasTwoAdjacentDigits/1) |>
-            Enum.filter(&digitsNeverDecrease/1) |>
+        Stream.map(265275..781584, &(&1)) |>
+            Stream.filter(&hasTwoAdjacentDigits/1) |>
+            Stream.filter(&digitsNeverDecrease/1) |>
+            Enum.to_list() |>
             length()
     end
 
     def part2 do
-        Enum.map(265275..781584, fn x -> x end) |>
-            Enum.filter(&digitsNeverDecrease/1) |>
-            Enum.filter(&hasTwoOfSame/1) |>
+        Stream.map(265275..781584, &(&1)) |>
+            Stream.filter(&digitsNeverDecrease/1) |>
+            Stream.filter(&hasTwoOfSame/1) |>
+            Enum.to_list() |>
             length()
     end
 end
